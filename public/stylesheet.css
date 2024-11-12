@@ -1,0 +1,185 @@
+/* style.css */
+@font-face {
+    font-family: 'BerkeleyMono';
+    src: url('font/BerkeleyMono-Regular.woff2') format('woff2'),
+         url('font/BerkeleyMono-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+  }
+@font-face {
+    font-family: 'BerkeleyMono';
+    src: url('font/BerkeleyMono-Bold.woff2') format('woff2'),
+         url('font/BerkeleyMono-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+  }
+body {
+    font-family: 'BerkeleyMono', sans-serif;
+    text-align: left;
+    margin: 0.5;
+    padding: 0;
+    line-height: 1.1;
+  }
+
+  bigTitle {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10em;
+    font-weight: bold;
+    position: relative;
+    top: 0px;        /* Adjusts distance from the top */
+    left: 5px;       /* Adjusts distance from the left */
+    margin: 0;       /* Ensures no extra margin around the title */
+    color: #111;
+    line-height: 1; /* Adjusts space between the lines */
+  }
+  
+  .wrapper {
+    width: 100%;
+    margin-inline: auto;
+    position: relative;
+    height: 20px;
+    overflow: hidden;
+  }
+  
+  @keyframes scrollLeft {
+    to {
+      left: -160px;
+    }
+  }
+  
+  .item {
+    width: 100px;
+    height: 20px;
+    font-weight: bold;
+    position: absolute;
+    left: max(calc(100px * 10), 100%);
+    animation-name: scrollLeft;
+    animation-duration: 15s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  
+  .item1 {
+    animation-delay: calc(15s / 10 * (10 - 1) * -1);
+  }
+  
+  .item2 {
+    animation-delay: calc(15s / 10 * (10 - 2) * -1);
+  }
+  
+  .item3 {
+    animation-delay: calc(15s / 10 * (10 - 3) * -1);
+  }
+  
+  .item4 {
+    animation-delay: calc(15s / 10 * (10 - 4) * -1);
+  }
+  
+  .item5 {
+    animation-delay: calc(15s / 10 * (10 - 5) * -1);
+  }
+  
+  .item6 {
+    animation-delay: calc(15s / 10 * (10 - 6) * -1);
+  }
+  
+  .item7 {
+    animation-delay: calc(15s / 10 * (10 - 7) * -1);
+  }
+  
+  .item8 {
+    animation-delay: calc(15s / 10 * (10 - 8) * -1);
+  }
+
+  .item9 {
+    animation-delay: calc(15s / 10 * (10 - 9) * -1);
+  }
+
+  .item10 {
+    animation-delay: calc(15s / 10 * (10 - 10) * -1);
+  }
+
+  
+
+
+  name{
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    position: absolute;
+    text-align: right;
+    top: 20px;        /* Adjusts distance from the top */
+    right: 20px;       /* Adjusts distance from the left */
+    margin: 0;       /* Ensures no extra margin around the title */
+    color: #111;
+    line-height: 1;
+  }
+
+  dice{
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15em;
+    font-weight: bold;
+    position: absolute; 
+    color: #111;
+    line-height: 1;
+  }
+
+  a {
+    position: relative;
+    color: gray; /* Initial color for the link text */
+    text-decoration: none; /* Removes the underline */
+    font-weight: light;
+    display: inline-block;
+    overflow: hidden; /* Ensures the rectangle overlay stays within the link boundaries */
+  }
+  
+  a::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: yellow; /* The color of the covering rectangle */
+    z-index: 1;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.1s ease;
+  }
+  
+  a:hover::after {
+    transform: scaleX(1); /* Expands the rectangle to cover the text */
+  }
+   
+  a:hover {
+    color: transparent; /* Hides the text color on hover */
+  }
+
+  header {
+    font-family: 'Montserrat', sans-serif;
+    /* background-color: #4CAF50; */
+    color: black;
+    font-size: 1.5em;
+  }
+  
+  p {
+    position: relative;
+    color: gray; /* Initial color for the link text */
+    text-decoration: none; /* Removes the underline */
+    font-weight: light;
+    /* display: inline-block; */
+    overflow: hidden;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.5em 1em;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8em;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
