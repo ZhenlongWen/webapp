@@ -7,33 +7,12 @@
   <link rel="stylesheet" href="stylesheet.css">
 </head>
 <body>
-
-    <h1>Welcome to the Fortune Teller!</h1>
-    <br />
-    <input type="text" id="nameInput" placeholder="Enter your name" />
-    <button onclick="getFortune()">Get My Fortune</button>
-    <br />
-    <p id="fortuneOutput"></p>
- 
-  <script>
-  async function getFortune() {
-  const name = document.getElementById("nameInput").value;
-
-  // Make a fetch request to the backend API
-  try {
-    const response = await fetch(`/api/fortune?name=${encodeURIComponent(name)}`);
-    if (response.ok) {
-      const fortune = await response.text();
-      document.getElementById("fortuneOutput").textContent = fortune; // Display the fortune
-    } else {
-      document.getElementById("fortuneOutput").textContent = "Sorry, something went wrong!";
-    }
-  } catch (error) {
-    console.error("Error fetching fortune:", error);
-    document.getElementById("fortuneOutput").textContent = "Failed to fetch fortune. Check your connection.";
-  }
-
-}
-  </script>
+  <h1>Upload an Image for Interpretation</h1>
+  <form id="uploadForm">
+      <input type="file" id="imageInput" accept="image/*" required>
+      <button type="submit">Analyze Image</button>
+  </form>
+  <div id="results"></div>
+  <script src="script.js"></script>
 </body>
 </html>

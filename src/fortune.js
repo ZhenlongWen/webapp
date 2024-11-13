@@ -1,8 +1,6 @@
-import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.js";
-import { config } from "https://deno.land/x/dotenv/mod.js";
+import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { promptGPT } from "./shared/openai.ts"; // Import your custom promptGPT function
 
-config(); // Load environment variables
 
 const app = new Application();
 const router = new Router();
