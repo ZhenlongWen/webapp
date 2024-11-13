@@ -1,44 +1,64 @@
-import { Application, Router, Context } from "https://deno.land/x/oak@v12.6.0/mod.ts";
-import { promptGPT } from "./shared/openai.ts";
+import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.js";
+import { config } from "https://deno.land/x/dotenv/mod.js";
+import { promptGPT } from "./shared/openai.js";
 
+config(); // Load environment variables
+
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 const app = new Application();
 const router = new Router();
 
-// Root route to check if the server is running
-router.get("/", (ctx) => {
-  ctx.response.body = "Welcome to the Image Analysis API!";
-});
+// Function to analyze the uploaded image using OpenAI's GPT-4 vision capabilities
+async function analyzeImage(file) {
+  const formData = new FormData();
+  formData.append("file", file);
 
-// Route to handle image upload and interpretation using promptGPT
-router.post("/api/analyze", async (ctx: Context) => {
-  try {
-    const body = await ctx.request.body({ type: "form-data" }).value;
-    const file = body.get("image");
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4-vision",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI that interprets the contents of images.",
+        },
+        {
+          role: "user",
+          content: "Describe the contents of this uploaded image.",
+        },
+      ],
+    }),
+  });
 
-    if (file && file instanceof File) {
-      // Convert the image file to a base64 string
-      const fileData = await file.arrayBuffer();
-      const base64Image = btoa(String.fromCharCode(...new Uint8Array(fileData)));
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "No description available.";
+}
 
-      // Use promptGPT to analyze the image
-      const description = await promptGPT(`Analyze the contents of this image: ${base64Image}`);
+router.post("/api/analyze", async (ctx) => {
+  const body = await ctx.request.body({ type: "form-data" }).value;
+  const file = body.get("image");
 
-      // Respond with the generated description
-      ctx.response.status = 200;
+  if (file && file instanceof File) {
+    try {
+      const description = await analyzeImage(file);
       ctx.response.body = { description };
-    } else {
-      ctx.response.status = 400;
-      ctx.response.body = { error: "Invalid image upload" };
+    } catch (error) {
+      console.error("Error:", error);
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Failed to analyze image" };
     }
-  } catch (error) {
-    console.error("Error analyzing image:", error);
-    ctx.response.status = 500;
-    ctx.response.body = { error: "Failed to analyze image" };
+  } else {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Invalid image upload" };
   }
 });
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-// Start the server for Deno Deploy
-addEventListener("fetch", app.fetch);
+const PORT = 8000;
+console.log(`Server running on http://localhost:${PORT}`);
+await app.listen({ port: PORT });
