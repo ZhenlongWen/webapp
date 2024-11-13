@@ -1,46 +1,42 @@
-import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { createExitSignal, staticServer } from "./shared/server.ts";
+import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.js";
+import { config } from "https://deno.land/x/dotenv/mod.js";
+import { promptGPT } from "./shared/openai.ts"; // Import your custom promptGPT function
+
+config(); // Load environment variables
 
 const app = new Application();
 const router = new Router();
 
-router.get("/api/d6", (ctx) => {
-  const roll = Math.floor(Math.random() * 6) + 1;
-  ctx.response.body = { value: roll };
-});
+// Route to handle image upload and interpretation using promptGPT
+router.post("/api/analyze", async (ctx) => {
+  const body = await ctx.request.body({ type: "form-data" }).value;
+  const file = body.get("image");
 
-router.get("/api/test", (ctx) => {
-    console.log("someone made a request to /api/test");
-  
-    // output some info about the request
-    console.log("ctx.request.url.pathname:", ctx.request.url.pathname);
-    console.log("myParam:", ctx.request.url.searchParams.get("myParam"));
-    console.log("ctx.request.method:", ctx.request.method);
-  
-    // send a response back to the browser
-    ctx.response.body = "This is a test.";
-  });
-  
-router.get("/api/fortune", (ctx) => {
-  const name = ctx.request.url.searchParams.get("name");
-  const fortunes = [
-    `Good things are coming your way, ${name}!`,
-    `${name}, a pleasant surprise awaits you.`,
-    `${name}, an old friend will bring you joy.`,
-    `${name}, trust your instincts in the days ahead.`,
-    `A great adventure is on the horizon for you, ${name}.`
-  ];
-  
-  const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-  ctx.response.body = randomFortune;
+  if (file && file instanceof File) {
+    try {
+      // Convert the image file to a base64 string
+      const fileData = await file.arrayBuffer();
+      const base64Image = btoa(String.fromCharCode(...new Uint8Array(fileData)));
+
+      // Use promptGPT to analyze the image
+      const description = await promptGPT(`Analyze the contents of this image: ${base64Image}`);
+
+      // Respond with the generated description
+      ctx.response.body = { description };
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Failed to analyze image" };
+    }
+  } else {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Invalid image upload" };
+  }
 });
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-app.use(staticServer);
-
-// Everything is set up, let's start the server
-console.log("\nListening on http://localhost:8000");
-await app.listen({ port: 8000, signal: createExitSignal() });
+const PORT = 8000;
+console.log(`Server running on http://localhost:${PORT}`);
+await app.listen({ port: PORT });
