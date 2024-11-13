@@ -1,30 +1,49 @@
-document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const fileInput = document.getElementById("imageInput");
+document.getElementById("upload-button").addEventListener("click", async () => {
+  const fileInput = document.getElementById("file-input");
   const file = fileInput.files[0];
+
   if (!file) {
-      alert("Please upload an image!");
+      alert("Please select an image!");
       return;
   }
 
-  const formData = new FormData();
-  formData.append("image", file);
+  // Convert the file to a Base64 string
+  const base64Image = await convertToBase64(file);
 
   try {
-      const response = await fetch("/api/analyze", {
+      // Send the Base64 image to the server
+      const response = await fetch("api/analyze", {
           method: "POST",
-          body: formData,
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image: base64Image }),
       });
 
-      const data = await response.json();
-      displayResults(data.description);
+      const result = await response.json();
+
+      if (result.success) {
+          displayResult(result.query);
+      } else {
+          alert("Analysis failed!");
+      }
   } catch (error) {
       console.error("Error:", error);
-      displayResults("Failed to analyze the image.");
+      alert("An error occurred!");
   }
 });
 
-function displayResults(description) {
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = `<h2>Description:</h2><p>${description}</p>`;
+// Convert file to Base64 string
+function convertToBase64(file) {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+  });
+}
+
+function displayResult(query) {
+  const resultDiv = document.getElementById("result");
+  resultDiv.textContent = `Query: ${query}`;
 }
