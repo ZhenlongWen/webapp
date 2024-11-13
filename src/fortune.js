@@ -1,37 +1,55 @@
-import { Application, Router } from "https://deno.land/x/oak@v12.6.0/mod.ts";
+// src/main_05_joke.js
+// Simple Deno backend with a static server and a custom route that
+// uses the OpenAI API to generate jokes.
 
-// Initialize a new Router
+// ?
+import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+
+// ?
+import { createExitSignal, staticServer } from "./shared/server.ts";
+
+// ?
+import { promptGPT } from "./shared/openai.ts";
+
+// ?
+const app = new Application();
 const router = new Router();
 
-// Route to handle image upload and respond with "yes"
-router.post("/api/analyze", async (ctx) => {
-  try {
-    // Get the form data
-    const body = await ctx.request.body({ type: "form-data" }).value;
-    const file = body.get("image");
+// ?
+router.get("/api/joke", async (ctx) => {
+  // ?
+  const topic = ctx.request.url.searchParams.get("topic");
 
-    // Check if a file was uploaded
-    if (file && file instanceof File) {
-      console.log("Image received:", file.name);
-      ctx.response.status = 200;
-      ctx.response.body = { description: "yes" };
-    } else {
-      ctx.response.status = 400;
-      ctx.response.body = { description: "No image uploaded" };
-    }
-  } catch (error) {
-    console.error("Error processing request:", error);
-    ctx.response.status = 500;
-    ctx.response.body = { description: "Server error" };
-  }
+  // ?
+  console.log("someone made a request to /api/joke", topic);
+
+  // ?
+  const joke = await promptGPT(`Tell me a brief joke about ${topic}.`);
+
+  // ?
+  ctx.response.body = joke;
 });
 
-// Initialize the Oak application
-const app = new Application();
+// ?
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-// Use the event listener pattern required by Deno Deploy
-addEventListener("fetch", (event) => {
-  event.respondWith(app.handle(event.request));
-});
+// ?
+app.use(staticServer);
+
+// ?
+console.log("\nListening on http://localhost:8000");
+await app.listen({ port: 8000, signal: createExitSignal() });
+
+// Create an instance of the Application and Router classes
+// Everything is set up, let's start the server
+// Import the promptGPT function from the class library
+// Create a route to handle requests to /api/joke
+// Ask GPT to generate a joke about the topic
+// Get the topic from the query string `?topic=...`
+// Log the request to the terminal
+// Import the the Application and Router classes from the Oak module
+// Import server helper functions from the class library
+// Send the joke back to the client
+// Try serving undefined routes with static files
+// Tell the app to use the custom routes
