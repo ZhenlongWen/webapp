@@ -1,49 +1,48 @@
-document.getElementById("upload-button").addEventListener("click", async () => {
-  const fileInput = document.getElementById("file-input");
-  const file = fileInput.files[0];
+// Select the file input and image elements
+const imageInput = document.getElementById("imageInput");
+const outputElement = document.getElementById("output");
+const uploadedImage = document.getElementById("uploadedImage");
 
-  if (!file) {
-      alert("Please select an image!");
-      return;
-  }
-
-  // Convert the file to a Base64 string
-  const base64Image = await convertToBase64(file);
-
-  try {
-      // Send the Base64 image to the server
-      const response = await fetch("api/analyze", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ image: base64Image }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-          displayResult(result.query);
-      } else {
-          alert("Analysis failed!");
-      }
-  } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred!");
+// Event listener for when a file is selected
+imageInput.addEventListener("change", async () => {
+  if (imageInput.files.length === 0) {
+    console.log("No image uploaded");
+  } else {
+    console.log("Image uploaded");
+    const file = imageInput.files[0]; // Get the selected file
+    if (file) {
+      console.log('this is the file: ', file)
+      await sendImage();
+    }
+    else {
+      console.log('no file found!!')
+    }
   }
 });
 
-// Convert file to Base64 string
-function convertToBase64(file) {
-  return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-  });
-}
-
-function displayResult(query) {
-  const resultDiv = document.getElementById("result");
-  resultDiv.textContent = `Query: ${query}`;
-}
+async function sendImage() {
+  const reader = new FileReader(); // Create a FileReader to read the file
+  const file = imageInput.files[0]; // Get the selected file
+  reader.readAsDataURL(file); // Read the file as a Data URL
+  console.log('this is the reader: ', reader)
+  reader.onload = async function (e) {
+    uploadedImage.src = e.target.result; // Set the src of the image to the file content
+    uploadedImage.style.display = "block"; // Show the image
+    // Show loading text while processing
+    outputElement.textContent = "Analyzing...";
+    // Send the image to the backend for analysis
+    try {
+      console.log('reader result: ', reader.result)
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: JSON.stringify({ image: reader.result }),
+      });
+      const data = await response.json();
+      // Display the analysis result
+      outputElement.textContent = data.analysis;
+    } catch (error) {
+      console.error("Error:", error);
+      outputElement.textContent = "An error occurred while analyzing the image.";
+    }
+  };
+};

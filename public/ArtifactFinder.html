@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fortune Teller</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap">
   <link rel="stylesheet" href="stylesheet.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArtifactFinder</title>
+  </head>
 </head>
 <body>
-  <h1>Upload an Image</h1>
-  <form id="uploadForm">
-    <input type="file" id="imageInput" accept="image/*" required>
-    <button type="submit">Upload Image</button>
-  </form>
-  <div id="result"></div>
-  <script src="script.js"></script>
+    <h1>Artifact Finder</h1>
+    <label for="imageInput" class="button">Upload an image:</label>
+    <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+    <div class="image-container">
+      <img id="uploadedImage" src="" alt="Uploaded Image" />
+  </div>
+
+  <div id="output"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>

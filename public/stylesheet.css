@@ -20,6 +20,24 @@ body {
     padding: 0;
     line-height: 1.1;
   }
+  .image-container {
+    width: 300px;    /* Set the width of the container */
+    height: 300px;   /* Set the height of the container */
+    border: 0px; /* Optional border for visibility */
+    overflow: hidden;  /* Hide any overflow */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+#uploadedImage {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Ensures the image fits within the container without distortion */
+    display: none;       /* Initially hidden */
+}
 
   bigTitle {
     font-family: 'Montserrat', sans-serif;
@@ -31,6 +49,12 @@ body {
     margin: 0;       /* Ensures no extra margin around the title */
     color: #111;
     line-height: 1; /* Adjusts space between the lines */
+  }
+
+  h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25em;
+
   }
   
   .wrapper {
@@ -171,15 +195,25 @@ body {
     overflow: hidden;
   }
   
-  button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 0.5em 1em;
-    border: none;
+  .button {
+    display: inline-block;
     cursor: pointer;
-    font-size: 0.8em;
+    background: black;
+    border: none;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    transition: 10ms;
+    width: 300px;     /* Fixed width */
+    height: 45px;     /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  
-  button:hover {
-    background-color: #45a049;
+  .button:hover {
+    background-color: yellow;
   }
+
+  #output {
+    width: 300px;
+}

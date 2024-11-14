@@ -3,5 +3,10 @@
   "deno.lint": true,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
-  "deno.enablePaths": ["./src"]
+  "deno.enablePaths": [
+    "./src"
+  ],
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }
