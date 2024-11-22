@@ -2,6 +2,7 @@
 const imageInput = document.getElementById("imageInput");
 const outputElement = document.getElementById("output");
 const uploadedImage = document.getElementById("uploadedImage");
+const searchedImageContainer = document.getElementById("searchedImageContainer"); // Container to display the images
 
 // Event listener for when a file is selected
 imageInput.addEventListener("change", async () => {
@@ -32,12 +33,35 @@ async function sendImage() {
     outputElement.textContent = "Analyzing...";
     // Send the image to the backend for analysis
     try {
-      console.log('reader result: ', reader.result)
+      console.log('reader result: ', reader.result);
       const response = await fetch("/api/analyze", {
         method: "POST",
         body: JSON.stringify({ image: reader.result }),
       });
       const data = await response.json();
+      console.log(data.cooperHewittData);
+
+      // Clear previous images if any
+      searchedImageContainer.innerHTML = "";
+
+      // Loop through cooperHewittData (array of objects) and get the first image from each multimedia array
+      data.cooperHewittData.forEach((item) => {
+        // Check if multimedia exists and has at least one item
+        if (item.multimedia && item.multimedia.length > 0) {
+          const firstImageUrl = item.multimedia[0].large.url;
+
+          // Create a new image element and set its src to the first image URL
+          const imgElement = document.createElement("img");
+          imgElement.src = firstImageUrl;
+          imgElement.alt = item.title || "Cooper Hewitt object";
+          imgElement.style.width = "10%"; // Adjust size as needed
+          imgElement.style.marginBottom = "10px";
+
+          // Append the image element to the container
+          searchedImageContainer.appendChild(imgElement);
+        }
+      });
+
       // Display the analysis result
       outputElement.textContent = data.analysis;
     } catch (error) {
