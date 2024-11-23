@@ -34,8 +34,7 @@ router.post("/api/analyze", async (ctx) => {
 async function searchCooperHewittAPI(analysis) {
     const query = `
         query getObject($description: String!) {
-        object(description: $description) {
-          id
+        object(hasImages:true, description: $description) {
           title
           description
           multimedia
@@ -69,7 +68,6 @@ async function searchCooperHewittAPI(analysis) {
 
         const data = await response.json();
         //console.log("Cooper Hewitt API Response:", data);
-
         // Assuming the API returns an object with an array of objects
         console.log(data.data.object[0].multimedia[0].large.url);
 
@@ -98,7 +96,7 @@ async function analyzeImageWithGPT(imageBase64) {
                 content: [
                     {
                         type: "text",
-                        text: `recgonize the main object in this image, output a query term describing its shape, only out put the shape.`,
+                        text: `recgonize the main object in this image, output a query term describing what does it look like, try to be more specific, avoid words like irregular. only out put the term. If there's people in it, describe their activity, only using one word.`,
                     },
                     {
                         type: "image_url",

@@ -25,7 +25,7 @@ async function sendImage() {
   const reader = new FileReader(); // Create a FileReader to read the file
   const file = imageInput.files[0]; // Get the selected file
   reader.readAsDataURL(file); // Read the file as a Data URL
-  console.log('this is the reader: ', reader)
+  // console.log('this is the reader: ', reader)
   reader.onload = async function (e) {
     uploadedImage.src = e.target.result; // Set the src of the image to the file content
     uploadedImage.style.display = "block"; // Show the image
@@ -33,7 +33,7 @@ async function sendImage() {
     outputElement.textContent = "Analyzing...";
     // Send the image to the backend for analysis
     try {
-      console.log('reader result: ', reader.result);
+      //console.log('reader result: ', reader.result);
       const response = await fetch("/api/analyze", {
         method: "POST",
         body: JSON.stringify({ image: reader.result }),
@@ -44,25 +44,8 @@ async function sendImage() {
       // Clear previous images if any
       searchedImageContainer.innerHTML = "";
 
-      // Loop through cooperHewittData (array of objects) and get the first image from each multimedia array
-      data.cooperHewittData.forEach((item) => {
-        // Check if multimedia exists and has at least one item
-        if (item.multimedia && item.multimedia.length > 0) {
-          const firstImageUrl = item.multimedia[0].large.url;
+      renderGallery(data.cooperHewittData);
 
-          // Create a new image element and set its src to the first image URL
-          const imgElement = document.createElement("img");
-          imgElement.src = firstImageUrl;
-          imgElement.alt = item.title || "Cooper Hewitt object";
-          imgElement.style.width = "10%"; // Adjust size as needed
-          imgElement.style.marginBottom = "10px";
-
-          // Append the image element to the container
-          searchedImageContainer.appendChild(imgElement);
-        }
-      });
-
-      // Display the analysis result
       outputElement.textContent = data.analysis;
     } catch (error) {
       console.error("Error:", error);
@@ -70,3 +53,69 @@ async function sendImage() {
     }
   };
 };
+
+
+function renderGallery(data) {
+  if (!data || data.length === 0) {
+    searchedImageContainer.innerHTML = "<p>No objects found!</p>";
+    return;
+  }
+
+  // Ensure data has a maximum of 10 objects
+  const objects = data.slice(0, 10);
+
+  // Create a grid container
+  const gridContainer = document.createElement("div");
+  gridContainer.classList.add("grid-container");
+
+  // Loop through objects to create cards
+  objects.forEach((item) => {
+    // Create a container for each object
+    const objectContainer = document.createElement("div");
+    objectContainer.classList.add("object-card");
+
+    // Add the image
+    if (item.multimedia && item.multimedia.length > 0) {
+      const firstImageUrl = item.multimedia[0].large.url;
+      const imgElement = document.createElement("img");
+      imgElement.src = firstImageUrl;
+      imgElement.alt = item.title || "Cooper Hewitt object";
+      imgElement.classList.add("object-image");
+      objectContainer.appendChild(imgElement);
+    }
+
+    // Add the overlay for title and description
+    const overlay = document.createElement("div");
+    overlay.classList.add("object-overlay");
+
+    const firstImageUrl = item.multimedia[0].large.url;
+    const imgElement = document.createElement("img");
+    imgElement.src = firstImageUrl;
+    imgElement.alt = item.title || "Cooper Hewitt object full";
+    imgElement.classList.add("fullImage");
+    overlay.appendChild(imgElement);
+
+    const titleElement = document.createElement("h3");
+    titleElement.textContent =
+      (item.title && item.title[0] && item.title[0].value) || "Untitled Object";
+    titleElement.classList.add("object-title");
+    overlay.appendChild(titleElement);
+
+    const descriptionElement = document.createElement("p");
+    descriptionElement.textContent =
+      (item.description && item.description[0] && item.description[0].value) ||
+      "No description available.";
+    descriptionElement.classList.add("object-description");
+    overlay.appendChild(descriptionElement);
+
+    // Append the overlay to the object container
+    objectContainer.appendChild(overlay);
+
+    // Append the object container to the grid
+    gridContainer.appendChild(objectContainer);
+  });
+
+  // Append the grid container to the main searchedImageContainer
+  searchedImageContainer.appendChild(gridContainer);
+}
+
