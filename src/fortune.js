@@ -1,6 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { createExitSignal, staticServer } from "./shared/server.ts";
-import { gpt } from "./shared/openai.ts";
+import { promptGPT, gpt } from "./shared/openai.ts";
 const app = new Application();
 const router = new Router();
 const apiUrl = `https://api.cooperhewitt.org/`;
@@ -91,7 +91,7 @@ async function searchCooperHewittAPI(analysis) {
 async function analyzeImageWithGPT(imageBase64) {
   console.log("Complete image data:", imageBase64);
   const response = await gpt({
-    model: "gpt-4o",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "user",
@@ -113,7 +113,7 @@ async function analyzeImageWithGPT(imageBase64) {
       },
     ],
     max_tokens: 1000,
-    temperature: 0.8,
+    temperature: 0.4,
   });
   console.log(response.content);
   return response.content;

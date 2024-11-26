@@ -57,12 +57,37 @@ function clearCanvas() {
 
 // Function to analyze whatever is on the canvas
 async function analyzeCanvas() {
-  // Create a temporary larger canvas
+  // First check if canvas is empty
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+
+  // Check if all pixels are the background color
+  let isEmpty = true;
+  for (let i = 0; i < pixels.length; i += 4) {
+    // Check if pixel is not the background color (f5f5f5)
+    if (pixels[i] !== 245 || pixels[i + 1] !== 245 || pixels[i + 2] !== 245 || pixels[i + 3] !== 255) {
+      isEmpty = false;
+      break;
+    }
+  }
+
+  if (isEmpty) {
+    outputElement.textContent = "Please draw something or upload an image first";
+    return;
+  }
+
+  // Create a temporary larger canvas with white background
   const tempCanvas = document.createElement('canvas');
   const tempCtx = tempCanvas.getContext('2d');
 
   tempCanvas.width = 800;
   tempCanvas.height = 800;
+
+  // Fill with white background first
+  tempCtx.fillStyle = "white";
+  tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+  // Draw the original canvas content
   tempCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, tempCanvas.width, tempCanvas.height);
 
   const base64Image = tempCanvas.toDataURL("image/png");
@@ -77,9 +102,6 @@ async function analyzeCanvas() {
     });
 
     const data = await response.json();
-    //console.log("GPT's analysis:", data.analysis);
-    //console.log("Cooper Hewitt data:", data.cooperHewittData);
-
     searchedImageContainer.innerHTML = "";
     renderGallery(data.cooperHewittData);
     outputElement.textContent = data.analysis;
