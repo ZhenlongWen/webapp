@@ -1,6 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { createExitSignal, staticServer } from "./shared/server.ts";
-import { promptGPT, gpt } from "./shared/openai.ts";
+import { gpt } from "./shared/openai.ts";
 const app = new Application();
 const router = new Router();
 const apiUrl = `https://api.cooperhewitt.org/`;
@@ -38,6 +38,7 @@ async function searchCooperHewittAPI(analysis) {
           title
           description
           multimedia
+          department
         }
       }
     `;
@@ -69,12 +70,12 @@ async function searchCooperHewittAPI(analysis) {
     const data = await response.json();
     //console.log("Cooper Hewitt API Response:", data);
     // Assuming the API returns an object with an array of objects
-    console.log(data.data.object[0].multimedia[0].large.url);
+    //console.log(data.data.object[0].multimedia[0].large.url);
 
     const objects = data.data.object;
 
     const limitedObjects = objects.slice(0, 10);
-    console.log(limitedObjects);
+    //console.log(limitedObjects);
     return limitedObjects;
 
 
@@ -88,6 +89,7 @@ async function searchCooperHewittAPI(analysis) {
 
 // Function to interact with OpenAI API for image analysis
 async function analyzeImageWithGPT(imageBase64) {
+  console.log("Complete image data:", imageBase64);
   const response = await gpt({
     model: "gpt-4o",
     messages: [
@@ -96,7 +98,10 @@ async function analyzeImageWithGPT(imageBase64) {
         content: [
           {
             type: "text",
-            text: `recgonize the main object in this image, output a query term describing what does it look like, try to be more specific, avoid words like irregular. only out put the term. If there's people in it, describe their activity, only using one word.`,
+            text: `Recgonize the main object in this image, output a query term describing what does it look like, avoid words like irregular. 
+                        only output the term, try to use one word to describe the most defining feature.
+                        examples: Tear drop, Tripod, Stars, tablet, Apple, Fragments, Gourd, wooden box, Spikes....
+                        If there's people in it, describe their activity, only using one word.`,
           },
           {
             type: "image_url",
@@ -110,7 +115,7 @@ async function analyzeImageWithGPT(imageBase64) {
     max_tokens: 1000,
     temperature: 0.8,
   });
-  //console.log(response.content);
+  console.log(response.content);
   return response.content;
 }
 

@@ -10,11 +10,17 @@
 </head>
 <body>
     <h1>Artifact Finder</h1>
-    <label for="imageInput" class="button">Upload an image of an object:</label>
-    <input type="file" id="imageInput" accept="image/*" style="display: none;" />
-    <div class="image-container">
-      <img id="uploadedImage" src="" alt="Uploaded Image" />
-  </div>
+    <!-- <label for="imageInput" class="button">Upload an image of an object:</label>
+    <input type="file" id="imageInput" accept="image/*" style="display: none;" /> -->
+    <div class="container">
+      <div id="canvasContainer"></div>
+      <div class="button-container">
+        <button id="clearButton" class="button">Clear Canvas</button>
+        <button id="analyzeButton" class="button">Analyze</button>
+        <label for="imageInput" class="button">Upload an image of an object:</label>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+      </div>
+    </div>
 
   <div id="output"></div>
 
