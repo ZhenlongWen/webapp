@@ -26,6 +26,16 @@ function initializeCanvas() {
     canvas.addEventListener("mousemove", draw);
     canvas.addEventListener("mouseup", stopDrawing);
     canvas.addEventListener("mouseout", stopDrawing);
+
+    // Add touch events
+    canvas.addEventListener("touchstart", handleTouchStart);
+    canvas.addEventListener("touchmove", handleTouchMove);
+    canvas.addEventListener("touchend", handleTouchEnd);
+
+    // Prevent scrolling while drawing
+    canvas.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+    }, { passive: false });
 }
 
 function startDrawing(e) {

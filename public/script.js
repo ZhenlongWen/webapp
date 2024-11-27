@@ -26,7 +26,59 @@ function initializeCanvas() {
   canvas.addEventListener("mouseup", stopDrawing);
   canvas.addEventListener("mouseout", stopDrawing);
 
+  // Add touch events
+  canvas.addEventListener("touchstart", handleTouchStart);
+  canvas.addEventListener("touchmove", handleTouchMove);
+  canvas.addEventListener("touchend", handleTouchEnd);
+
+  // Prevent scrolling while drawing
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+  }, { passive: false });
+
   drawPrompt();
+}
+
+function handleTouchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  isDrawing = true;
+  [lastX, lastY] = [x, y];
+
+  // Clear prompt on first draw
+  if (showPrompt) {
+    showPrompt = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+function handleTouchMove(e) {
+  e.preventDefault();
+  if (!isDrawing) return;
+
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  ctx.beginPath();
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+
+  [lastX, lastY] = [x, y];
+}
+
+function handleTouchEnd(e) {
+  e.preventDefault();
+  isDrawing = false;
 }
 
 function drawPrompt() {
