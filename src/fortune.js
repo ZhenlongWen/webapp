@@ -34,11 +34,16 @@ router.post("/api/analyze", async (ctx) => {
 async function searchCooperHewittAPI(analysis) {
   const query = `
         query getObject($description: String!) {
-        object(hasImages:true, description: $description) {
-          title
-          description
-          multimedia
-          department
+        object(
+            hasImages: true, 
+            description: $description,
+            department: "Product Design and Decorative Arts"
+        ) {
+            title
+            description
+            multimedia
+            department
+            medium
         }
       }
     `;

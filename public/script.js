@@ -6,6 +6,7 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 const clearCanvasButton = document.getElementById("clearButton");
 const sendDrawingButton = document.getElementById("analyzeButton");
+let showPrompt = true;
 
 // Canvas drawing variables
 let isDrawing = false;
@@ -24,11 +25,28 @@ function initializeCanvas() {
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", stopDrawing);
   canvas.addEventListener("mouseout", stopDrawing);
+
+  drawPrompt();
+}
+
+function drawPrompt() {
+  if (showPrompt) {
+    ctx.font = "25px BerkeleyMono";  // Match your font
+    ctx.fillStyle = "#e4e4e4";  // Light gray color for the text
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Draw something here", canvas.width / 2, canvas.height / 2);
+  }
 }
 
 function startDrawing(e) {
   isDrawing = true;
   [lastX, lastY] = [e.offsetX, e.offsetY];
+
+  if (showPrompt) {
+    showPrompt = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 }
 
 function draw(e) {
@@ -53,6 +71,8 @@ sendDrawingButton.addEventListener("click", analyzeCanvas);
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  showPrompt = true;
+  drawPrompt();
 }
 
 // Function to analyze whatever is on the canvas
@@ -114,6 +134,7 @@ async function analyzeCanvas() {
 
 // Function to draw image on canvas
 function drawImageOnCanvas(img) {
+  showPrompt = false;
   const CANVAS_SIZE = 400;
   const scale = Math.min(
     CANVAS_SIZE / img.width,
