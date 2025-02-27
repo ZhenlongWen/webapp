@@ -78,9 +78,10 @@ async function searchCooperHewittAPI(analysis) {
         //console.log(data.data.object[0].multimedia[0].large.url);
 
         const objects = data.data.object;
+        // console.log(objects);
 
-        const limitedObjects = objects.slice(0, 10);
-        //console.log(limitedObjects);
+        const limitedObjects = objects.slice(0, 12);
+        // console.log(limitedObjects);
         return limitedObjects;
 
 

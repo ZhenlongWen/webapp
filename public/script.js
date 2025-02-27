@@ -1,12 +1,16 @@
 const imageInput = document.getElementById("imageInput");
-const outputElement = document.getElementById("output");
 const searchedImageContainer = document.getElementById("searchedImageContainer");
 const canvasContainer = document.getElementById("canvasContainer");
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 const clearCanvasButton = document.getElementById("clearButton");
 const sendDrawingButton = document.getElementById("analyzeButton");
+const showInfoButton = document.getElementById("showInfo");
+const imageInfoDiv = document.getElementById("imageInfo");
 let showPrompt = true;
+let hasUserDrawn = false;
+let analysisData = null;
+let isAnalyzing = false;
 
 // Canvas drawing variables
 let isDrawing = false;
@@ -15,8 +19,8 @@ let lastY = 0;
 
 // Create and style canvas
 function initializeCanvas() {
-  canvas.width = 400;
-  canvas.height = 400;
+  canvas.width = 450;
+  canvas.height = 550;
   canvas.style.backgroundColor = "#f5f5f5";
   canvasContainer.appendChild(canvas);
 
@@ -54,6 +58,8 @@ function handleTouchStart(e) {
     showPrompt = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
+
+  hasUserDrawn = true;
 }
 
 function handleTouchMove(e) {
@@ -99,6 +105,9 @@ function startDrawing(e) {
     showPrompt = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
+
+  //user has started drawing
+  hasUserDrawn = true;
 }
 
 function draw(e) {
@@ -120,31 +129,40 @@ function stopDrawing() {
 // Add button event listeners
 clearCanvasButton.addEventListener("click", clearCanvas);
 sendDrawingButton.addEventListener("click", analyzeCanvas);
+showInfoButton.addEventListener("click", toggleInfo);
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   showPrompt = true;
   drawPrompt();
+  hasUserDrawn = false;
+}
+
+// Function to toggle the info display
+function toggleInfo() {
+  imageInfoDiv.classList.toggle("hidden");
+  showInfoButton.classList.toggle("active");
+
+  // Only show content when toggled open
+  if (!imageInfoDiv.classList.contains("hidden")) {
+    if (isAnalyzing) {
+      imageInfoDiv.textContent = "Analyzing... Please wait.";
+    } else if (analysisData) {
+      imageInfoDiv.textContent = analysisData;
+    } else {
+      imageInfoDiv.textContent = "Please analyze your drawing first to see information.";
+    }
+  }
 }
 
 // Function to analyze whatever is on the canvas
 async function analyzeCanvas() {
   // First check if canvas is empty
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-
-  // Check if all pixels are the background color
-  let isEmpty = true;
-  for (let i = 0; i < pixels.length; i += 4) {
-    // Check if pixel is not the background color (f5f5f5)
-    if (pixels[i] !== 245 || pixels[i + 1] !== 245 || pixels[i + 2] !== 245 || pixels[i + 3] !== 255) {
-      isEmpty = false;
-      break;
+  if (!hasUserDrawn) {
+    // Only show this message if info panel is already open
+    if (!imageInfoDiv.classList.contains("hidden")) {
+      imageInfoDiv.textContent = "Please draw something or upload an image first";
     }
-  }
-
-  if (isEmpty) {
-    outputElement.textContent = "Please draw something or upload an image first";
     return;
   }
 
@@ -165,7 +183,13 @@ async function analyzeCanvas() {
   const base64Image = tempCanvas.toDataURL("image/png");
   console.log("Image being sent to GPT:", base64Image);
 
-  outputElement.textContent = "Analyzing...";
+  // Set analyzing flag
+  isAnalyzing = true;
+
+  // Only update the info panel if it's already open
+  if (!imageInfoDiv.classList.contains("hidden")) {
+    imageInfoDiv.textContent = "Analyzing... Please wait.";
+  }
 
   try {
     const response = await fetch("/api/analyze", {
@@ -176,11 +200,24 @@ async function analyzeCanvas() {
     const data = await response.json();
     searchedImageContainer.innerHTML = "";
     renderGallery(data.cooperHewittData);
-    outputElement.textContent = data.analysis;
+
+    // Store the analysis data but don't automatically show it
+    analysisData = data.analysis;
+    isAnalyzing = false;
+
+    // Only update the info panel if it's already open
+    if (!imageInfoDiv.classList.contains("hidden")) {
+      imageInfoDiv.textContent = analysisData;
+    }
 
   } catch (error) {
     console.error("Error:", error);
-    outputElement.textContent = "An error occurred while analyzing the image.";
+    isAnalyzing = false;
+
+    // Only update the info panel if it's already open
+    if (!imageInfoDiv.classList.contains("hidden")) {
+      imageInfoDiv.textContent = "An error occurred while analyzing the image.";
+    }
   }
 }
 
@@ -204,6 +241,9 @@ function drawImageOnCanvas(img) {
     img.width * scale,
     img.height * scale
   );
+
+  //user has uploaded an image
+  hasUserDrawn = true;
 }
 
 // Handle image upload 
@@ -229,14 +269,26 @@ function renderGallery(data) {
     return;
   }
 
-  const objects = data.slice(0, 10);
-  const gridContainer = document.createElement("div");
-  gridContainer.classList.add("grid-container");
+  // Ensure data has a maximum of 12 objects
+  const objects = data.slice(0, 12);
 
-  objects.forEach((item) => {
+  // Clear previous content
+  searchedImageContainer.innerHTML = "";
+
+  // Create two columns for results
+  const leftColumn = document.createElement("div");
+  leftColumn.classList.add("result-column");
+
+  const rightColumn = document.createElement("div");
+  rightColumn.classList.add("result-column");
+
+  // Add objects to left and right columns alternately
+  objects.forEach((item, index) => {
+    // Create a container for each object
     const objectContainer = document.createElement("div");
     objectContainer.classList.add("object-card");
 
+    // Add the image
     if (item.multimedia && item.multimedia.length > 0) {
       const firstImageUrl = item.multimedia[0].large.url;
       const imgElement = document.createElement("img");
@@ -246,34 +298,37 @@ function renderGallery(data) {
       objectContainer.appendChild(imgElement);
     }
 
-    const overlay = document.createElement("div");
-    overlay.classList.add("object-overlay");
-
-    const firstImageUrl = item.multimedia[0].large.url;
-    const imgElement = document.createElement("img");
-    imgElement.src = firstImageUrl;
-    imgElement.alt = item.title || "Cooper Hewitt object full";
-    imgElement.classList.add("fullImage");
-    overlay.appendChild(imgElement);
-
+    // Add title below the image
     const titleElement = document.createElement("h3");
     titleElement.textContent =
       (item.title && item.title[0] && item.title[0].value) || "Untitled Object";
     titleElement.classList.add("object-title");
-    overlay.appendChild(titleElement);
+    objectContainer.appendChild(titleElement);
 
+    // Add description below the title
     const descriptionElement = document.createElement("p");
     descriptionElement.textContent =
       (item.description && item.description[0] && item.description[0].value) ||
       "No description available.";
     descriptionElement.classList.add("object-description");
-    overlay.appendChild(descriptionElement);
+    objectContainer.appendChild(descriptionElement);
 
-    objectContainer.appendChild(overlay);
-    gridContainer.appendChild(objectContainer);
+    // Add to left column if even index, right column if odd
+    if (index % 2 === 0) {
+      leftColumn.appendChild(objectContainer);
+    } else {
+      rightColumn.appendChild(objectContainer);
+    }
   });
 
-  searchedImageContainer.appendChild(gridContainer);
+  // Create a container for both columns
+  const columnsContainer = document.createElement("div");
+  columnsContainer.classList.add("results-columns");
+  columnsContainer.appendChild(leftColumn);
+  columnsContainer.appendChild(rightColumn);
+
+  // Append the columns container to the main searchedImageContainer
+  searchedImageContainer.appendChild(columnsContainer);
 }
 
 // Initialize canvas when the page loads
