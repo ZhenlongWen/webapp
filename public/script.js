@@ -93,7 +93,7 @@ function drawPrompt() {
     ctx.fillStyle = "#e4e4e4";  // Light gray color for the text
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("Draw something here", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("Draw something more than a line here", canvas.width / 2, canvas.height / 2);
   }
 }
 
